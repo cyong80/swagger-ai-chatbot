@@ -93,8 +93,9 @@ export const askAI = async (
     notifyDebug();
     return result;
   } catch (e) {
-    log.error = e instanceof Error ? e.message : String(e);
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    log.error = errorMessage;
     notifyDebug();
-    throw e;
+    return `[오류] ${errorMessage}`;
   }
 };

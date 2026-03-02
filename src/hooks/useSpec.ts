@@ -29,7 +29,8 @@ async function fetchSpecFromTab(
 }
 
 export function useSpec(
-  tabService: ITabService = ChromeTabService
+  tabService: ITabService = ChromeTabService,
+  options?: { onBeforeReload?: () => void }
 ) {
   const [spec, setSpec] = useState<unknown>(null);
   const [showReloadConfirm, setShowReloadConfirm] = useState(false);
@@ -73,10 +74,15 @@ export function useSpec(
     return () => chrome.tabs.onActivated.removeListener(listener);
   }, []);
 
-  const onConfirmReload = useCallback(() => {
+  const reloadSpec = useCallback(async () => {
+    options?.onBeforeReload?.();
+    await fetchSpec();
+  }, [fetchSpec, options?.onBeforeReload]);
+
+  const onConfirmReload = useCallback(async () => {
     setShowReloadConfirm(false);
-    fetchSpec();
-  }, [fetchSpec]);
+    await reloadSpec();
+  }, [reloadSpec]);
 
   const onDismissReloadConfirm = useCallback(() => {
     setShowReloadConfirm(false);
@@ -95,6 +101,7 @@ export function useSpec(
   return {
     spec,
     fetchSpec,
+    reloadSpec,
     showReloadConfirm,
     onConfirmReload,
     onDismissReloadConfirm,

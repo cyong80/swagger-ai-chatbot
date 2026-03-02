@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Settings, MessageSquare } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ModeToggle } from "@/components/mode-toggle";
@@ -22,15 +23,19 @@ export default function App() {
   const settings = useSettings();
   const { provider, keys, maxOutputTokens } = settings;
 
+  const beforeReloadRef = useRef<() => void>(() => {});
   const {
     spec,
-    fetchSpec,
+    reloadSpec,
     showReloadConfirm,
     onConfirmReload,
     onDismissReloadConfirm,
-  } = useSpec();
+  } = useSpec(undefined, {
+    onBeforeReload: () => beforeReloadRef.current(),
+  });
 
   const chat = useChat(provider, keys, spec, maxOutputTokens);
+  beforeReloadRef.current = chat.clearMessages;
 
   const { handlePickApi } = useApiPicker(spec, chat.handleSendWithPrompt);
 
@@ -100,7 +105,7 @@ export default function App() {
             onSend={chat.handleSend}
             isLoading={chat.isLoading}
             spec={spec}
-            onRefreshSpec={fetchSpec}
+            onRefreshSpec={reloadSpec}
             onPickApi={handlePickApi}
           />
         </TabsContent>

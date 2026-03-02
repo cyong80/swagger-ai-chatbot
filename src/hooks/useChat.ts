@@ -75,6 +75,11 @@ export function useChat(
     [messages, sendMessage]
   );
 
+  const clearMessages = useCallback(() => {
+    setMessages([]);
+    setInput("");
+  }, []);
+
   return {
     messages,
     input,
@@ -82,5 +87,6 @@ export function useChat(
     isLoading,
     handleSend,
     handleSendWithPrompt,
+    clearMessages,
   };
 }
